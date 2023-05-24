@@ -1,39 +1,51 @@
-# A sample Python project
+# Publish to PyPI, and let's see how the *Python Software Foundation* interprets consent GDPR-wise
 
-![Python Logo](https://www.python.org/static/community_logos/python-logo.png "Sample inline image")
+## Context
+[*PyPI was subpoenaed*](https://blog.pypi.org/posts/2023-05-24-pypi-was-subpoenaed/), especially [*point 6*](https://blog.pypi.org/posts/2023-05-24-pypi-was-subpoenaed/#6-telephone-or-instrument-numbers-including-the-registration-internet-protocol-address):
 
-A sample project that exists as an aid to the [Python Packaging User
-Guide][packaging guide]'s [Tutorial on Packaging and Distributing
-Projects][distribution tutorial].
+> A synopsis of all IP Addresses for each username from previous records were shared. These were sourced from our database records and are private to PyPI.
 
-This project does not aim to cover best practices for Python project
-development as a whole. For example, it does not provide guidance or tool
-recommendations for version control, documentation, or testing.
+* [*Hacker News* discussion about this](https://news.ycombinator.com/item?id=36061407)
+* [*Who does the data protection law apply to?*](https://commission.europa.eu/law/law-topic/data-protection/reform/rules-business-and-organisations/application-regulation/who-does-data-protection-law-apply_en)
+* [*Does the GDPR apply to companies outside of the EU?*](https://gdpr.eu/companies-outside-of-europe/)
+* [*When do the GDPR provisions apply to non-EU businesses?*](https://www.activemind.legal/guides/gdpr-non-eu-businesses/)
 
-[The source for this project is available here][src].
+## Steps to reproduce
+* Be in the European Union. No citizenship required.
+* Create an account at https://pypi.org/account/register/ ([*archive.is* English localization memento from 24 May 2023 20:25:43 UTC](https://archive.is/CdDOa)). Notice that you don't have to provide any explicit consent to any terms and conditions.
+* Confirm verification e-mail. Notice it just contains a confirmation link, e.g. `https://pypi.org/account/verify-email/?token=eyJhY3Rpb24iOiJlbWFpbC12ZXJpZnkiLCJlbWFpbC5pZCI6IjEyMzQ1IiwiYWxnIjoiSFMyNTYifQ.YWJjZA.bB3cVvD2EnTZ7sOD7XNPnxv0xgl9Q3svmcDCG8UTR9Q`.
+  * The *token* parameter value is an unencrypted, *HMACSHA256*-signed *JSON Web Token*, in this example it provides the following information (try it out at https://jwt.io/):
+```
+// header
+{
+  "action": "email-verify",
+  "email.id": "12345",
+  "alg": "HS256"
+}
 
-The metadata for a Python project is defined in the `pyproject.toml` file,
-an example of which is included in this project. You should edit this file
-accordingly to adapt this sample project to your needs.
+// payload
+"abcd"
+```
+* Visit the [*Python Packaging Authority*'s (PyPA) *pypa/sampleproject* GitHub project page](https://github.com/pypa/sampleproject).
+* Select *Use this template* and create your own fork, e.g. [*Abdull/gdpr*](https://github.com/Abdull/gdpr).
+* Adapt repository files, in particular *pyproject.toml* and *README.md*.
+* Build:
+```
+# see https://packaging.python.org/en/latest/flow/
+# see https://packaging.python.org/en/latest/tutorials/installing-packages/
+# see https://packaging.python.org/en/latest/tutorials/packaging-projects/
 
-----
+# assuming Debian 11 bullseye in the following
 
-This is the README file for the project.
+# get ensurepip, Debian apt-way:
+sudo apt install python3-venv
 
-The file should use UTF-8 encoding and can be written using
-[reStructuredText][rst] or [markdown][md use] with the appropriate [key set][md
-use]. It will be used to generate the project webpage on PyPI and will be
-displayed as the project homepage on common code-hosting services, and should be
-written for that purpose.
+pip install --upgrade pip setuptools wheel build
 
-Typical contents for this file would include an overview of the project, basic
-usage examples, etc. Generally, including the project changelog in here is not a
-good idea, although a simple “What's New” section for the most recent version
-may be appropriate.
+# inside your project
+python3 -m build
 
-[packaging guide]: https://packaging.python.org
-[distribution tutorial]: https://packaging.python.org/tutorials/packaging-projects/
-[src]: https://github.com/pypa/sampleproject
-[rst]: http://docutils.sourceforge.net/rst.html
-[md]: https://tools.ietf.org/html/rfc7764#section-3.5 "CommonMark variant"
-[md use]: https://packaging.python.org/specifications/core-metadata/#description-content-type-optional
+# on success, shall end with line
+# Successfully built gdpr-1.0.0.tar.gz and gdpr-1.0.0-py3-none-any.whl
+
+```
